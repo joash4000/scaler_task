@@ -7,12 +7,14 @@ export default class Add extends React.Component{
         this.state={
         	candidates_username:"",
         	candidates_email:"",
+            interviewer_email:"",
             start_time:"",
             end_time:""
         	
         }
 		this.onChangename= this.onChangename.bind(this);
         this.onChangeemail = this.onChangeemail.bind(this);
+        this.onChange_inter_email= this.onChange_inter_email.bind(this);
         this.onSubmit = this.onSubmit.bind(this);
         
 
@@ -25,7 +27,9 @@ export default class Add extends React.Component{
     onChangeemail(event) {
         this.setState({candidates_email: event.target.value });
     }
-    
+    onChange_inter_email(event){
+        this.setState({interviewer_email: event.target.value });
+    }
     async onSubmit(e) {
         e.preventDefault();
         
@@ -34,25 +38,25 @@ export default class Add extends React.Component{
         const List= this.state
         console.log(List)
         //delete List.files
-        await axios.post('http://localhost:4000/candidadeform', List)
+     await axios.post('http://localhost:4000/candidadeform', List)
                  .then(res => {
                    if(res.data.success==true){
                    		lid = res.data.listid
-                      document.getElementById("AfterSubmit").innerHTML = "LIST ADDED";
+                      document.getElementById("AfterSubmit").innerHTML = "INTERVIEW SCHEDULED";
                       console.log(res.data)
                     
                    }
-                   else{
-                      document.getElementById("AfterSubmit").innerHTML = "LOGIN FIRST";
+                 if(res.data.success==false){
+                    document.getElementById("AfterSubmit").innerHTML = "Candidate not available in the time slot";
                    }
-                 });
-
-        
-
-
-
-
-    }
+                //    else{
+                //       //document.getElementById("AfterSubmit").innerHTML = "LOGIN FIRST";
+                //    }
+                 }).catch(e=>{
+                    document.getElementById("AfterSubmit").innerHTML = "Candidate not available in the time slot";
+                 })
+                
+       }
 	render(){
 
 
@@ -61,7 +65,7 @@ export default class Add extends React.Component{
   			<div className='card-container'>
              <form onSubmit={this.onSubmit}>
                     <div className="form-group">        
-                        <label>Candidate Name: </label>
+                        <label>Participant Name: </label>
                         <input type="text" 
                                className="form-control" 
                                value={this.state.candidates_username}
@@ -70,11 +74,21 @@ export default class Add extends React.Component{
                                />
                     </div>
                     <div className="form-group">
-                        <label>Candidate Email: </label>
+                        <label>Participant Email: </label>
                         <input type="text" 
                                className="form-control" 
                                value={this.state.candidates_email}
                                onChange={this.onChangeemail}
+                               required
+
+                               />  
+                    </div>
+                    <div className="form-group">
+                        <label>Interviewer Email: </label>
+                        <input type="text" 
+                               className="form-control" 
+                               value={this.state.interviewer_email}
+                               onChange={this.onChange_inter_email}
                                required
 
                                />  

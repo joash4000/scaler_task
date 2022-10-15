@@ -1,6 +1,6 @@
 import React from 'react'
 import axios from 'axios'
-import RS from './runit'
+import DISP from './disp'
 export default class Display extends React.Component{
     constructor(props){
 		super(props)
@@ -27,7 +27,7 @@ export default class Display extends React.Component{
        lis.push(lol[i])
     }
       console.log(lis)
-        const List = lis.map((item) => <RS itm={item} />)   
+        const List = lis.map((item) => <DISP itm={item} />)   
 
 		return(
 

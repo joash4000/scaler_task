@@ -17,12 +17,9 @@ let Listofcan = require('./models/listofcandidates')
 app.use(cors({credentials: true, origin: true}));
 app.use(cookieParser());
 
-// app.use(cors());
+
 app.use(bodyParser.json());
 app.use(session({secret:"lkasdjflsadjf",saveUninitialized : true,resave:false}));
-// Connection to mongodb
-// mongoose.connect('mongodb://127.0.0.1:27017/app', { useNewUrlParser: true ,useUnifiedTopology: true });
-//const dburl="mongodb+srv://josh4000:5v2hPc4uBXvPAvZH@cluster4.z8iv8vw.mongodb.net/scaler_project?retryWrites=true&w=majority"
 const dburl="mongodb+srv://josh:sdb9691387540@cluster4.z8iv8vw.mongodb.net/?retryWrites=true&w=majority"
 
 mongoose.connect(dburl, { useNewUrlParser: true ,useUnifiedTopology: true });
@@ -31,38 +28,45 @@ connection.once('open', function() {
     console.log("MongoDB database connection established succesfully.");
 })
 
-userRoutes.post('/candidadeform',function(req,res){
-	let list = new Listofcan(req.body);
-    {/*
-    Listofcan.find({candidates_username:req.body.candidates_username,candidates_email:req.body.candidates_email},function(err,lis){
-        if(err){
-            console.log(err);
-            return res.status(500).send({success:false,message:"server error"});
-        }
-        if(lis){
-        	for(var i in lis){
-                if(req.body.start_time>lis[i].start_time  && req.body.start_time<lis[i].end_time){
-                    res.send({success:false,message:"Candidate not available in the time slot"});
-                    // res.redirect('/')
-                    return res
-                }
-                if(req.body.end_time>lis[i].start_time  && req.body.end_time<lis[i].end_time){
-                    res.send({success:false,message:"Candidate not available in the time slot"});
-                    // res.redirect('/')
-                    return res
-                }
+userRoutes.post('/candidadeform',async function(req,res){
+        try{
+        const candidates=await Listofcan.find({candidates_username:req.body.candidates_username,candidates_email:req.body.candidates_email});
+        var flag=0;
+        for(var i in candidates){
+          //  console.log("41" ,req.body.start_time>lis[i].start_time  && req.body.start_time<lis[i].end_time)
+           // console.log("42" ,req.body.end_time>lis[i].start_time  && req.body.end_time<lis[i].end_time)
+            if(req.body.start_time>candidates[i].start_time  && req.body.start_time<candidates[i].end_time){
+               
+                 flag=1;
+                 break;
             }
+            if(req.body.end_time>candidates[i].start_time  && req.body.end_time<candidates[i].end_time){
+             flag=1;
+                 break;
+            } 
+            if(req.body.start_time<candidates[i].start_time  && req.body.end_time>candidates[i].end_time){
+                flag=1;
+                    break;
+             } 
+               if(req.body.start_time>candidates[i].start_time  && req.body.end_time<candidates[i].end_time){
+                flag=1;
+                    break;
+               } 
         }
-    })*/}
-    list.save()
-        .then(user=> {
-            res.status(200).json({'success': true,listid:list._id});
-        })
-        .catch(err => {
-            res.status(400).send('Error');
-        });
+        if(flag===1){
+            console.log(flag)
+            res.status(400).json({success:false,message:"Candidate not available in the time slot"});
+            return ;
+        }else{
+            let list = new Listofcan(req.body);
+            const can=list.save();
+            res.status(200).json({'success':true});
+        }
+        }catch(e){
+            return res.status(500).send('Error');
+        }
+       
 });
-
 userRoutes.get('/getcan',function(req,res){
     Listofcan.find({},function(err,lis){
        if(err){
@@ -78,7 +82,18 @@ userRoutes.get('/getcan',function(req,res){
        return res.status(200).json(lis);
    })
 });
+userRoutes.post('/deleterecord',function(req,res){
+    var can_id =req.body.id;
+    console.log(can_id)
+    Listofcan.deleteOne({_id:can_id},function(err){
+        if(err){
+            console.log(err);
+            return res.status(500).send({success:false,message:"server error"});
+        }
+        return res.status(204).send({success:true,message:"record deleted"});;
+    })
 
+});
 userRoutes.post('/addrate',function(req,res){
     console.log(req.body)
     var can_id =req.body.can_id;
@@ -94,7 +109,7 @@ userRoutes.post('/addrate',function(req,res){
         }
         lst.start_time=req.body.start_time
         lst.end_time=req.body.end_time
-        
+        lst.interviewer_email=req.body.interviewer_email
         lst.save(function(err,upd){
             if(err){
                 return res.status(500)
