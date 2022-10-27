@@ -8,7 +8,7 @@
     text-align: center;
   }
   #column3 {
-      flex: 33.33%;
+      flex:63.33%;
       height: 200px;
       width: 200px;
       padding: 10px;
@@ -54,5 +54,5 @@
     box-sizing: border-box;
     padding: 10px;
     width: 325px;
-    height: 490px;
+    height: 570px;
    }

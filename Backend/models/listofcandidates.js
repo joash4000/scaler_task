@@ -7,7 +7,10 @@ let Listofcan = new mongoose.Schema({
     candidates_email: {
         type: String
     },
-    interviewer_email :{
+    interviewer_1:{
+        type: String
+    },
+    interviewer_2:{
         type: String
     },
     start_time:{
